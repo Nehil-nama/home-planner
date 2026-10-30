@@ -1,4 +1,6 @@
 import type { Plan, Room } from './types';
+export const PLOT_MIN = 10; // smallest plot side, in feet
+export const PLOT_MAX = 100; // largest plot side, in feet
 
 export const MIN_SIZE = 4; // smallest room side, in feet
 

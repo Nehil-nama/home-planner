@@ -3,15 +3,19 @@ import { Editor2D } from './components/Editor2D';
 import { RoomList } from './components/RoomList';
 import { RoomPanel } from './components/RoomPanel';
 import { Scene3D } from './components/Scene3D';
+import { FileActions } from './components/FileActions';
+import { PlotPanel } from './components/PlotPanel';
 
 export default function App() {
   return (
     <div className="grid h-screen grid-cols-[280px_minmax(0,1fr)_minmax(0,1fr)] text-slate-900">
-      <aside className="grid content-start gap-5 overflow-y-auto border-r-2 border-slate-200 p-4">
+            <aside className="grid content-start gap-5 overflow-y-auto border-r-2 border-slate-200 p-4">
         <h1 className="text-xl font-bold">Home Planner</h1>
         <RoomList />
         <AddRoom />
         <RoomPanel />
+        <PlotPanel />
+        <FileActions />
       </aside>
 
       <section className="relative h-full border-r-2 border-slate-200">
