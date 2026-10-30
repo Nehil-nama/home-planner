@@ -1,13 +1,17 @@
+import { AddRoom } from './components/AddRoom';
 import { Editor2D } from './components/Editor2D';
 import { RoomList } from './components/RoomList';
+import { RoomPanel } from './components/RoomPanel';
 import { Scene3D } from './components/Scene3D';
 
 export default function App() {
   return (
     <div className="grid h-screen grid-cols-[280px_minmax(0,1fr)_minmax(0,1fr)] text-slate-900">
-      <aside className="overflow-y-auto border-r-2 border-slate-200 p-4">
-        <h1 className="mb-4 text-xl font-bold">Home Planner</h1>
+      <aside className="grid content-start gap-5 overflow-y-auto border-r-2 border-slate-200 p-4">
+        <h1 className="text-xl font-bold">Home Planner</h1>
         <RoomList />
+        <AddRoom />
+        <RoomPanel />
       </aside>
 
       <section className="relative h-full border-r-2 border-slate-200">

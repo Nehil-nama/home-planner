@@ -1,25 +1,11 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import type Konva from 'konva';
 import { Layer, Line, Rect, Stage, Text, Transformer } from 'react-konva';
+import { fit, MIN_SIZE } from '../model/geometry';
 import { usePlanner } from '../model/store';
-import { ROOM_COLORS, type Plan } from '../model/types';
+import { ROOM_COLORS } from '../model/types';
 
 const PAD = 24; // pixels of margin around the plot
-const MIN_SIZE = 4; // smallest room side, in feet
-
-const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
-
-// Snap a room to whole feet and keep it inside the plot
-function fit(plot: Plan['plot'], x: number, y: number, w: number, d: number) {
-  const width = Math.min(Math.max(MIN_SIZE, Math.round(w)), plot.width);
-  const depth = Math.min(Math.max(MIN_SIZE, Math.round(d)), plot.depth);
-  return {
-    x: clamp(Math.round(x), 0, plot.width - width),
-    y: clamp(Math.round(y), 0, plot.depth - depth),
-    width,
-    depth,
-  };
-}
 
 function useElementSize<T extends HTMLElement>() {
   const ref = useRef<T>(null);
