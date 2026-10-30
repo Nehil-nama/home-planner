@@ -13,8 +13,10 @@
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "@tailwindcss/vite": "^4.3.3",
+    "konva": "^10.9.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
+    "react-konva": "^19.3.2",
     "tailwindcss": "^4.3.3",
     "three": "^0.186.1",
     "zustand": "^5.0.16"
