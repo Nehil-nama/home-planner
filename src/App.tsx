@@ -5,6 +5,7 @@ import { RoomPanel } from './components/RoomPanel';
 import { Scene3D } from './components/Scene3D';
 import { FileActions } from './components/FileActions';
 import { PlotPanel } from './components/PlotPanel';
+import { ChecksPanel } from './components/ChecksPanel'
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <RoomList />
         <AddRoom />
         <RoomPanel />
+        <ChecksPanel />
         <PlotPanel />
         <FileActions />
       </aside>

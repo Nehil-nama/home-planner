@@ -1,7 +1,8 @@
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import type Konva from 'konva';
 import { Layer, Line, Rect, Stage, Text, Transformer } from 'react-konva';
 import { fit, MIN_SIZE } from '../model/geometry';
+import { checkPlan } from '../model/rules';
 import { usePlanner } from '../model/store';
 import { ROOM_COLORS } from '../model/types';
 
@@ -36,6 +37,9 @@ export function Editor2D() {
   const transformer = useRef<Konva.Transformer>(null);
 
   const { plot, rooms } = plan;
+
+  // rooms with at least one issue get an amber dashed outline
+  const flagged = useMemo(() => new Set(checkPlan(plan).map((i) => i.roomId)), [plan]);
 
   // pixels per foot, chosen so the whole plot fits the available space
   const scale =
@@ -103,6 +107,7 @@ export function Editor2D() {
 
             {rooms.map((room) => {
               const selected = room.id === selectedId;
+              const hasIssue = flagged.has(room.id);
               return (
                 <Fragment key={room.id}>
                   <Rect
@@ -114,8 +119,9 @@ export function Editor2D() {
                     width={room.width * scale}
                     height={room.depth * scale}
                     fill={ROOM_COLORS[room.kind]}
-                    stroke={selected ? '#1f3a5f' : '#64748b'}
+                    stroke={selected ? '#1f3a5f' : hasIssue ? '#b45309' : '#64748b'}
                     strokeWidth={selected ? 3 : 1.5}
+                    dash={hasIssue && !selected ? [6, 4] : undefined}
                     draggable
                     onMouseDown={() => select(room.id)}
                     onTouchStart={() => select(room.id)}
