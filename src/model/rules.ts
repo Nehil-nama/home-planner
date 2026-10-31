@@ -1,5 +1,14 @@
-import { overlaps } from './geometry';
-import { ROOM_DEFAULTS, type Plan, type Room, type RoomKind } from './types';
+import { overlaps, sideLength } from './geometry';
+import {
+  OPENING_DEFAULTS,
+  ROOM_DEFAULTS,
+  SIDES,
+  type Opening,
+  type Plan,
+  type Room,
+  type RoomKind,
+  type Side,
+} from './types';
 
 export interface Issue {
   id: string;
@@ -26,26 +35,33 @@ function insideAnyRoom(rooms: Room[], px: number, py: number) {
   return rooms.some((r) => px > r.x && px < r.x + r.width && py > r.y && py < r.y + r.depth);
 }
 
-// The longest stretch (in whole feet) of any side that no other room covers.
+// How many whole feet of a stretch [from, to] along one side are not covered by another room.
 // Outside the plot there are no rooms, so the plot edge counts as open.
-export function openWall(room: Room, others: Room[]): number {
+function openLength(room: Room, others: Room[], side: Side, from: number, to: number): number {
   const { x, y, width: w, depth: d } = room;
 
-  const countOpen = (length: number, point: (i: number) => [number, number]) => {
-    let open = 0;
-    for (let i = 0; i < Math.floor(length); i++) {
-      const [px, py] = point(i);
-      if (!insideAnyRoom(others, px, py)) open++;
-    }
-    return open;
-  };
+  // a point just outside the wall, t feet along it
+  const point = (t: number): [number, number] =>
+    side === 'top'
+      ? [x + t, y - 0.5]
+      : side === 'bottom'
+        ? [x + t, y + d + 0.5]
+        : side === 'left'
+          ? [x - 0.5, y + t]
+          : [x + w + 0.5, y + t];
 
-  return Math.max(
-    countOpen(w, (i) => [x + i + 0.5, y - 0.5]), // top side
-    countOpen(w, (i) => [x + i + 0.5, y + d + 0.5]), // bottom side
-    countOpen(d, (i) => [x - 0.5, y + i + 0.5]), // left side
-    countOpen(d, (i) => [x + w + 0.5, y + i + 0.5]), // right side
-  );
+  let open = 0;
+  const feet = Math.floor(to - from);
+  for (let i = 0; i < feet; i++) {
+    const [px, py] = point(from + i + 0.5);
+    if (!insideAnyRoom(others, px, py)) open++;
+  }
+  return open;
+}
+
+// The longest open stretch (in whole feet) on any side of the room
+export function openWall(room: Room, others: Room[]): number {
+  return Math.max(...SIDES.map((side) => openLength(room, others, side, 0, sideLength(room, side))));
 }
 
 // Square feet of the plot covered by at least one room (overlaps are counted once)
@@ -59,11 +75,20 @@ export function builtArea(plan: Plan): number {
   return cells;
 }
 
+// "Window 2", numbered per kind within the room (same naming as the panel)
+function openingName(room: Room, o: Opening) {
+  const number = room.openings.filter((x) => x.kind === o.kind).indexOf(o) + 1;
+  return `${OPENING_DEFAULTS[o.kind].name} ${number}`;
+}
+
 export function checkPlan(plan: Plan): Issue[] {
   const issues: Issue[] = [];
   const { rooms } = plan;
 
   rooms.forEach((room, i) => {
+    const others = rooms.filter((r) => r.id !== room.id);
+
+    // --- rooms on top of each other ---
     for (const other of rooms.slice(i + 1)) {
       if (overlaps(room, other)) {
         issues.push({
@@ -75,6 +100,7 @@ export function checkPlan(plan: Plan): Issue[] {
       }
     }
 
+    // --- size ---
     const min = MIN_ROOM[room.kind];
     const kindName = ROOM_DEFAULTS[room.kind].name.toLowerCase();
     const area = room.width * room.depth;
@@ -98,8 +124,20 @@ export function checkPlan(plan: Plan): Issue[] {
       });
     }
 
+    // --- doors ---
+    const windows = room.openings.filter((o) => o.kind === 'window');
+
+    if (!room.openings.some((o) => o.kind === 'door')) {
+      issues.push({
+        id: `door:${room.id}`,
+        severity: 'warning',
+        roomId: room.id,
+        message: `${room.name} has no door.`,
+      });
+    }
+
+    // --- light and ventilation ---
     if (needsLight(room.kind)) {
-      const others = rooms.filter((r) => r.id !== room.id);
       if (openWall(room, others) < MIN_OPEN_WALL) {
         issues.push({
           id: `light:${room.id}`,
@@ -107,8 +145,43 @@ export function checkPlan(plan: Plan): Issue[] {
           roomId: room.id,
           message: `${room.name} has no wall with ${MIN_OPEN_WALL} ft facing open space, so it may lack light and ventilation.`,
         });
+      } else if (windows.length === 0) {
+        // only worth saying when a window would actually have somewhere to face
+        issues.push({
+          id: `window:${room.id}`,
+          severity: 'warning',
+          roomId: room.id,
+          message: `${room.name} has no window.`,
+        });
       }
     }
+
+    // --- windows that look at another room ---
+    for (const w of windows) {
+      const open = openLength(room, others, w.side, w.offset, w.offset + w.width);
+      if (open * 2 < Math.floor(w.width)) {
+        issues.push({
+          id: `facing:${w.id}`,
+          severity: 'warning',
+          roomId: room.id,
+          message: `${openingName(room, w)} in ${room.name} faces another room, not open space.`,
+        });
+      }
+    }
+
+    // --- openings on top of each other ---
+    room.openings.forEach((a, j) => {
+      for (const b of room.openings.slice(j + 1)) {
+        if (a.side === b.side && a.offset < b.offset + b.width && a.offset + a.width > b.offset) {
+          issues.push({
+            id: `clash:${a.id}:${b.id}`,
+            severity: 'warning',
+            roomId: room.id,
+            message: `${openingName(room, a)} and ${openingName(room, b)} in ${room.name} overlap.`,
+          });
+        }
+      }
+    });
   });
 
   return issues;
