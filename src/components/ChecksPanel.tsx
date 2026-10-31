@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { builtArea, checkPlan } from '../model/rules';
 import { usePlanner } from '../model/store';
 
-export function ChecksPanel() {
+export function ChecksPanel({ onPick }: { onPick?: () => void }) {
   const plan = usePlanner((s) => s.plan);
   const select = usePlanner((s) => s.select);
 
@@ -29,7 +29,10 @@ export function ChecksPanel() {
             <li key={issue.id}>
               <button
                 type="button"
-                onClick={() => select(issue.roomId)}
+                onClick={() => {
+                  select(issue.roomId);
+                  onPick?.();
+                }}
                 className="grid w-full gap-0.5 rounded-md border-2 border-slate-200 px-3 py-2 text-left text-sm hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-800"
               >
                 <span className={issue.severity === 'error' ? 'font-bold text-red-700' : 'font-bold text-amber-800'}>
