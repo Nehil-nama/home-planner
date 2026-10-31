@@ -158,6 +158,31 @@ export function Editor2D() {
                     fill="#1e293b"
                     listening={false}
                   />
+
+                                    {room.openings.map((o) => {
+                    const x0 = room.x * scale;
+                    const y0 = room.y * scale;
+                    const from = o.offset * scale;
+                    const to = (o.offset + o.width) * scale;
+                    const points =
+                      o.side === 'top'
+                        ? [x0 + from, y0, x0 + to, y0]
+                        : o.side === 'bottom'
+                          ? [x0 + from, y0 + room.depth * scale, x0 + to, y0 + room.depth * scale]
+                          : o.side === 'left'
+                            ? [x0, y0 + from, x0, y0 + to]
+                            : [x0 + room.width * scale, y0 + from, x0 + room.width * scale, y0 + to];
+                    return (
+                      <Line
+                        key={o.id}
+                        points={points}
+                        stroke={o.kind === 'door' ? '#7c4a1e' : '#0284c7'}
+                        strokeWidth={6}
+                        dash={o.kind === 'window' ? [5, 3] : undefined}
+                        listening={false}
+                      />
+                    );
+                  })}
                 </Fragment>
               );
             })}

@@ -6,6 +6,7 @@ import { Scene3D } from './components/Scene3D';
 import { FileActions } from './components/FileActions';
 import { PlotPanel } from './components/PlotPanel';
 import { ChecksPanel } from './components/ChecksPanel'
+import { OpeningsPanel } from './components/OpeningPanel';
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
         <RoomList />
         <AddRoom />
         <RoomPanel />
+        <OpeningsPanel />
         <ChecksPanel />
         <PlotPanel />
         <FileActions />
@@ -22,7 +24,7 @@ export default function App() {
 
       <section className="relative h-full border-r-2 border-slate-200">
         <span className="pointer-events-none absolute left-3 top-2 z-10 text-xs font-bold text-slate-500">
-          2D plan: drag to move, use the handles to resize
+        2D plan: drag to move, use the handles to resize. Brown line: door. Dashed blue line: window.
         </span>
         <Editor2D />
       </section>

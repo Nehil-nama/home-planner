@@ -1,6 +1,14 @@
 import { z } from 'zod';
-import { PLOT_MAX } from './geometry';
+import { PLOT_MAX, sideLength, WALL_THICKNESS } from './geometry';
 import type { Plan } from './types';
+
+const OpeningSchema = z.object({
+  id: z.string().min(1),
+  kind: z.enum(['door', 'window']),
+  side: z.enum(['top', 'right', 'bottom', 'left']),
+  offset: z.number().min(0),
+  width: z.number().positive(),
+});
 
 const RoomSchema = z.object({
   id: z.string().min(1),
@@ -10,6 +18,8 @@ const RoomSchema = z.object({
   y: z.number().min(0),
   width: z.number().positive(),
   depth: z.number().positive(),
+  // older saved plans have no openings, so default to an empty list instead of failing
+  openings: z.array(OpeningSchema).default([]),
 });
 
 export const PlanSchema = z
@@ -18,12 +28,22 @@ export const PlanSchema = z
       width: z.number().positive().max(PLOT_MAX),
       depth: z.number().positive().max(PLOT_MAX),
     }),
-    wallHeight: z.number().positive().max(20),
+    wallHeight: z.number().min(8).max(20),
     rooms: z.array(RoomSchema),
   })
   .refine(
     (p) => p.rooms.every((r) => r.x + r.width <= p.plot.width && r.y + r.depth <= p.plot.depth),
     { message: 'A room extends outside the plot.' },
+  )
+  .refine(
+    (p) =>
+      p.rooms.every((r) =>
+        r.openings.every((o) => {
+          const length = sideLength(r, o.side);
+          return o.offset >= WALL_THICKNESS && o.offset + o.width <= length - WALL_THICKNESS;
+        }),
+      ),
+    { message: 'A door or window does not fit on its wall.' },
   );
 
 // Turns unknown data (a file, localStorage) into a safe Plan, or a readable error
