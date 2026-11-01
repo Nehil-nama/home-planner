@@ -5,8 +5,6 @@ Plan a small home in 2D and see it in 3D. Drag rooms around a plot, add doors an
 **Live demo:** https://YOUR-APP.vercel.app
 
 ![Home Planner overview](docs/overview.png)
-![Doors and windows in 3D](docs/openings.png)
-![Design checks](docs/checks.png)
 
 ## Features
 
