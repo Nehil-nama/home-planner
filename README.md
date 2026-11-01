@@ -2,7 +2,7 @@
 
 Plan a small home in 2D and see it in 3D. Drag rooms around a plot, add doors and windows, and get design feedback as you go. Everything runs in the browser.
 
-**Live demo:** https://YOUR-APP.vercel.app
+**Live demo:** https://home-planner-sandy.vercel.app
 
 ![Home Planner overview](docs/overview.png)
 
