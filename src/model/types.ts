@@ -30,12 +30,12 @@ export interface Plan {
 }
 
 export const ROOM_COLORS: Record<RoomKind, string> = {
-  living: '#cfe3f1',
-  bedroom: '#e6d3f0',
-  kitchen: '#f5dfb5',
-  bathroom: '#c8ebe3',
-  dining: '#f2cfc9',
-  other: '#dddddd',
+  living: '#d3dde6', // mist
+  bedroom: '#dcd6e8', // lavender grey
+  kitchen: '#e6dcc4', // limewash
+  bathroom: '#cfe3de', // celadon
+  dining: '#e5d0c9', // clay blush
+  other: '#d9dbd8', // concrete
 };
 
 export const ROOM_DEFAULTS: Record<RoomKind, { name: string; width: number; depth: number }> = {

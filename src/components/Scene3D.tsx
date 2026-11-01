@@ -105,7 +105,7 @@ function RoomMesh({ room, wallHeight }: { room: Room; wallHeight: number }) {
   const selected = selectedId === room.id;
 
   const { width: w, depth: d } = room;
-  const wallColor = selected ? '#ffd166' : '#f1eee8';
+  const wallColor = selected ? '#6fc2b6' : '#f3f4f1';
 
   return (
     <group
@@ -120,7 +120,7 @@ function RoomMesh({ room, wallHeight }: { room: Room; wallHeight: number }) {
         <Wall key={side} room={room} side={side} height={wallHeight} color={wallColor} />
       ))}
       <Html position={[0, 0.3, 0]} center style={{ pointerEvents: 'none' }}>
-        <div className="whitespace-nowrap rounded bg-white/85 px-2 py-0.5 text-xs font-bold text-slate-800">
+        <div className="whitespace-nowrap    rounded-sm border border-slate-800/60 bg-white/90 px-1.5 py-0.5 font-display text-xs font-medium tracking-wide text-slate-900">
           {room.name}
         </div>
       </Html>
@@ -139,7 +139,7 @@ export function Scene3D() {
     <Canvas
       shadows
       camera={{ position: [cx + 35, 45, cz + 55], fov: 45 }}
-      style={{ background: '#e8f0f7' }}
+      style={{ background: 'linear-gradient(#d9e2e6, #eef0ec)' }}
       onPointerMissed={() => select(null)}
     >
       <ambientLight intensity={0.6} />
@@ -155,7 +155,7 @@ export function Scene3D() {
       />
 
       {/* the plot itself */}
-      <Box position={[cx, -0.1, cz]} size={[plot.width, 0.2, plot.depth]} color="#b9d3a5" />
+      <Box position={[cx, -0.1, cz]} size={[plot.width, 0.2, plot.depth]} color="#b3c4a8" />
 
       {rooms.map((room) => (
         <RoomMesh key={room.id} room={room} wallHeight={wallHeight} />

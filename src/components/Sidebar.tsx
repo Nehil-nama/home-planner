@@ -56,16 +56,24 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="flex min-h-0 flex-col border-r-2 border-slate-200">
-      <div className="px-4 pt-4">
-        <h1 className="text-xl font-bold">Home Planner</h1>
-      </div>
+    <aside className="flex min-h-0 flex-col border-r-2 border-slate-200 bg-sheet">
+      <header className="flex items-center gap-3 px-4 pt-4">
+        <svg aria-hidden="true" viewBox="0 0 40 40" className="size-9 shrink-0">
+          <rect width="40" height="40" rx="4" fill="#1f2850" />
+          <path d="M7 20 20 9l13 11v11H7z" fill="#f8f9f7" />
+          <rect x="17" y="22" width="6" height="9" fill="#0f766e" />
+        </svg>
+        <div>
+          <h1>Home Planner</h1>
+          <p className="text-sm text-slate-500">Plan a small home and check it as you draw.</p>
+        </div>
+      </header>
 
       <div
         role="tablist"
         aria-label="Planner sections"
         onKeyDown={onKeyDown}
-        className="mt-3 flex gap-1 border-b-2 border-slate-200 px-4"
+        className="mt-3 flex gap-0.5 border-b-2 border-slate-200 px-3"
       >
         {TABS.map((t) => (
           <button
@@ -80,7 +88,7 @@ export function Sidebar() {
             aria-controls={`panel-${t.id}`}
             tabIndex={t.id === active ? 0 : -1}
             onClick={() => setActive(t.id)}
-            className="-mb-0.5 border-b-4 border-transparent px-3 py-2 text-sm font-bold text-slate-600 hover:text-slate-900 aria-selected:border-slate-800 aria-selected:text-slate-900 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-slate-800"
+            className="-mb-0.5 border-b-4 border-transparent px-3 py-2 font-display text-base font-medium text-slate-600 hover:text-slate-900 aria-selected:border-verdigris-600 aria-selected:text-slate-900 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-slate-800"
           >
             {t.label}
             {t.id === 'checks' && issueCount > 0 && (

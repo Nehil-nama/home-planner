@@ -1,1 +1,66 @@
 @import "tailwindcss";
+@import "@fontsource-variable/jost";
+@import "@fontsource/atkinson-hyperlegible/400.css";
+@import "@fontsource/atkinson-hyperlegible/700.css";
+
+@theme {
+  --font-sans: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --font-display: "Jost Variable", "Century Gothic", system-ui, sans-serif;
+
+  /* Every existing slate-* class picks up this ramp: concrete greys with indigo ink at the dark end */
+  --color-slate-50: #eef0f1;
+  --color-slate-100: #e2e6e8;
+  --color-slate-200: #cbd1d6;
+  --color-slate-300: #aab2bb;
+  --color-slate-400: #818b99;
+  --color-slate-500: #5f6a7a;
+  --color-slate-600: #485365;
+  --color-slate-700: #333c4f;
+  --color-slate-800: #1f2850;
+  --color-slate-900: #141b3d;
+
+  --color-sheet: #f8f9f7;
+  --color-verdigris-100: #d9eeea;
+  --color-verdigris-600: #0f766e;
+  --color-verdigris-800: #115e59;
+
+  /* squarer corners, like drafted shapes */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.1875rem;
+  --radius-lg: 0.25rem;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-slate-50);
+  color: var(--color-slate-900);
+  font-family: var(--font-sans);
+}
+
+/* Headings are unlayered on purpose: they must beat the font-bold utilities already in the components */
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+h1 {
+  font-size: 1.75rem;
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: 1.125rem;
+  line-height: 1.25;
+}
+
+::selection {
+  background: var(--color-verdigris-100);
+}

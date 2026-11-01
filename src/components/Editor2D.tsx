@@ -6,7 +6,12 @@ import { checkPlan } from '../model/rules';
 import { usePlanner } from '../model/store';
 import { ROOM_COLORS } from '../model/types';
 
-const PAD = 24; // pixels of margin around the plot
+const PAD = 40; // pixels of margin around the plot, room for the dimension lines
+
+const INK = '#1f2850';
+const VERDIGRIS = '#0f766e';
+const AMBER = '#b45309';
+const FONT = '"Jost Variable", sans-serif';
 
 function useElementSize<T extends HTMLElement>() {
   const ref = useRef<T>(null);
@@ -36,6 +41,19 @@ export function Editor2D() {
   const nodes = useRef<Record<string, Konva.Rect | null>>({});
   const transformer = useRef<Konva.Transformer>(null);
 
+  // canvas text only uses a web font once it has loaded, so switch families when it's ready
+  const [fontsReady, setFontsReady] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    document.fonts.load('700 12px "Jost Variable"').then(() => {
+      if (!cancelled) setFontsReady(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const family = fontsReady ? FONT : 'sans-serif';
+
   const { plot, rooms } = plan;
 
   // rooms with at least one issue get an amber dashed outline
@@ -46,6 +64,9 @@ export function Editor2D() {
     size.width > 0
       ? Math.max(4, Math.min((size.width - 2 * PAD) / plot.width, (size.height - 2 * PAD) / plot.depth))
       : 10;
+
+  const plotW = plot.width * scale;
+  const plotH = plot.depth * scale;
 
   // attach the resize handles to the selected room
   useEffect(() => {
@@ -66,8 +87,8 @@ export function Editor2D() {
     gridLines.push(
       <Line
         key={`v${i}`}
-        points={[i * scale, 0, i * scale, plot.depth * scale]}
-        stroke={i % 5 === 0 ? '#c3ccd8' : '#e3e8ef'}
+        points={[i * scale, 0, i * scale, plotH]}
+        stroke={i % 5 === 0 ? '#cbd2d8' : '#e3e7ea'}
         strokeWidth={1}
         listening={false}
       />,
@@ -77,13 +98,15 @@ export function Editor2D() {
     gridLines.push(
       <Line
         key={`h${j}`}
-        points={[0, j * scale, plot.width * scale, j * scale]}
-        stroke={j % 5 === 0 ? '#c3ccd8' : '#e3e8ef'}
+        points={[0, j * scale, plotW, j * scale]}
+        stroke={j % 5 === 0 ? '#cbd2d8' : '#e3e7ea'}
         strokeWidth={1}
         listening={false}
       />,
     );
   }
+
+  const dim = { stroke: INK, strokeWidth: 1, listening: false } as const;
 
   return (
     <div ref={containerRef} className="h-full w-full overflow-hidden bg-slate-50">
@@ -97,13 +120,51 @@ export function Editor2D() {
           <Layer x={PAD} y={PAD}>
             <Rect
               name="plot"
-              width={plot.width * scale}
-              height={plot.depth * scale}
-              fill="#f7fbf2"
-              stroke="#7a9a63"
+              width={plotW}
+              height={plotH}
+              fill="#f8f9f7"
+              stroke={INK}
               strokeWidth={2}
             />
             {gridLines}
+
+            {/* overall dimensions along the top and left, drawn like a drafting sheet */}
+            <Line points={[0, -4, 0, -20]} {...dim} />
+            <Line points={[plotW, -4, plotW, -20]} {...dim} />
+            <Line points={[0, -14, plotW, -14]} {...dim} />
+            <Line points={[-4, -10, 4, -18]} {...dim} strokeWidth={2} />
+            <Line points={[plotW - 4, -10, plotW + 4, -18]} {...dim} strokeWidth={2} />
+            <Text
+              x={0}
+              y={-35}
+              width={plotW}
+              align="center"
+              text={`${plot.width} ft`}
+              fontFamily={family}
+              fontStyle="bold"
+              fontSize={12}
+              fill={INK}
+              listening={false}
+            />
+
+            <Line points={[-4, 0, -20, 0]} {...dim} />
+            <Line points={[-4, plotH, -20, plotH]} {...dim} />
+            <Line points={[-14, 0, -14, plotH]} {...dim} />
+            <Line points={[-18, 4, -10, -4]} {...dim} strokeWidth={2} />
+            <Line points={[-18, plotH + 4, -10, plotH - 4]} {...dim} strokeWidth={2} />
+            <Text
+              x={-35}
+              y={plotH}
+              width={plotH}
+              rotation={-90}
+              align="center"
+              text={`${plot.depth} ft`}
+              fontFamily={family}
+              fontStyle="bold"
+              fontSize={12}
+              fill={INK}
+              listening={false}
+            />
 
             {rooms.map((room) => {
               const selected = room.id === selectedId;
@@ -119,7 +180,7 @@ export function Editor2D() {
                     width={room.width * scale}
                     height={room.depth * scale}
                     fill={ROOM_COLORS[room.kind]}
-                    stroke={selected ? '#1f3a5f' : hasIssue ? '#b45309' : '#64748b'}
+                    stroke={selected ? VERDIGRIS : hasIssue ? AMBER : INK}
                     strokeWidth={selected ? 3 : 1.5}
                     dash={hasIssue && !selected ? [6, 4] : undefined}
                     draggable
@@ -150,16 +211,17 @@ export function Editor2D() {
                     y={room.y * scale}
                     width={room.width * scale}
                     height={room.depth * scale}
-                    text={`${room.name}\n${room.width}×${room.depth} ft`}
+                    text={`${room.name}\n${room.width} × ${room.depth} ft`}
                     align="center"
                     verticalAlign="middle"
-                    fontSize={12}
+                    fontFamily={family}
                     fontStyle="bold"
-                    fill="#1e293b"
+                    fontSize={12}
+                    lineHeight={1.3}
+                    fill={INK}
                     listening={false}
                   />
-
-                                    {room.openings.map((o) => {
+                  {room.openings.map((o) => {
                     const x0 = room.x * scale;
                     const y0 = room.y * scale;
                     const from = o.offset * scale;
@@ -193,8 +255,10 @@ export function Editor2D() {
               flipEnabled={false}
               keepRatio={false}
               anchorSize={10}
-              borderStroke="#1f3a5f"
-              anchorStroke="#1f3a5f"
+              anchorFill="#ffffff"
+              anchorCornerRadius={1}
+              borderStroke={VERDIGRIS}
+              anchorStroke={VERDIGRIS}
               boundBoxFunc={(oldBox, newBox) =>
                 newBox.width < MIN_SIZE * scale || newBox.height < MIN_SIZE * scale ? oldBox : newBox
               }
